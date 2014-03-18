@@ -1,0 +1,14 @@
+{
+  "name": "watchmen",
+  "version": "0.0.1",
+  "description": "watch for github events and react",
+  "dependencies": {
+    "express": "latest",
+    "underscore": "latest"
+  },
+  "devDependencies": {
+    "grunt": "latest",
+    "grunt-bg-shell": "latest" 
+  },
+  "author": "Blake La Pierre"
+}
