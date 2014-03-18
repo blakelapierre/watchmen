@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "watch for github events and react",
   "dependencies": {
-    "express": "latest",
+    "githubhook": "latest",
     "underscore": "latest"
   },
   "devDependencies": {
