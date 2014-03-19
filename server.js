@@ -22,7 +22,17 @@ function puts(error, stdout, stderr) { sys.puts(stdout); };
 
 function exec(location, command) { 
     console.log('executing ' + command + ' at: ' + location);
-    childProcess.exec('cd ' + location + ' && ' + command, puts);
+    return childProcess.exec('cd ' + location + ' && ' + command, puts);
+};
+
+
+var deploy = function(project) {
+    project.redeploy = false;
+    project.deploy = exec(project.location, 'git pull origin && grunt localDeploy');
+    project.deploy.on('exit', function() {
+        delete project.deploy;
+        if (project.redeploy) deploy(project);
+    });
 };
 
 exports.startServer = function (config, callback) {
@@ -33,10 +43,15 @@ exports.startServer = function (config, callback) {
     github.on('push', function(repo, ref, data) {
     	var project = watching[repo];
 
+
 	    if (project) {
-    		_.each(project.commands, function(command) {
-                exec(project.location, command);
-		    });
+            if (project.deploy) {
+                project.redeploy = true;
+                project.deploy.kill();
+            }
+            else {
+                deploy(project);
+            }
 	    }
     });
 
