@@ -28,7 +28,7 @@ function exec(location, command) {
 
 var deploy = function(project) {
     project.redeploy = false;
-    project.deploy = exec(project.location, 'git pull origin && grunt localDeploy');
+    project.deploy = exec(project.location, 'git pull origin && npm update && bower update && grunt localDeploy');
     project.deploy.on('exit', function() {
         delete project.deploy;
         if (project.redeploy) deploy(project);
@@ -44,7 +44,7 @@ exports.startServer = function (config, callback) {
     	var project = watching[repo];
 
 
-	    if (project) {
+        if (project) {
             if (project.deploy) {
                 project.redeploy = true;
                 project.deploy.kill();
@@ -52,7 +52,7 @@ exports.startServer = function (config, callback) {
             else {
                 deploy(project);
             }
-	    }
+        }
     });
 
     callback(github);
