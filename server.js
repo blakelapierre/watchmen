@@ -35,7 +35,18 @@ exports.startServer = function (config, callback) {
 
     var initialize = function(project) {
         var location = path.join(project.location, project.nextDeploymentID.toString());
-        project.deploymentCommand = 'mkdir -p ' + location + ' && cd ' + location + ' && git init && git remote add origin ' + project.remoteLocation + ' && git pull origin master && npm install && bower install && grunt localDeploy';
+            commands = [
+                'mkdir -p ' + location,
+                'cd ' + location,
+                'git init',
+                'git remote add origin ' + project.remoteLocation,
+                'git pull origin master',
+                'npm install',
+                'bower install',
+                'grunt localDeploy'
+            ];
+
+            project.deploymentCommand = commands.join(' && ');
     };
     
     var deploy = function(project) {
