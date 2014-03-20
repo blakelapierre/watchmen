@@ -3,7 +3,8 @@ var githubhook = require('githubhook'),
     sys = require('sys'),
     fs = require('fs'),
     path = require('path'),
-    childProcess = require('child_process');
+    childProcess = require('child_process'),
+    psTree = require('ps-tree');
 
 var watching = {};
 
@@ -11,7 +12,21 @@ function puts(error, stdout, stderr) { sys.puts(stdout); };
 
 function exec(command) { 
     console.log('executing command: ' + command);
-    return childProcess.exec(command, puts);
+    var deployment = childProcess.spawn('/bin/sh', ['-c', command]);
+
+    deployment.on('error', function(error) {
+        console.dir(error);
+    });
+
+    deployment.stdout.on('data', function(data) {
+        console.log('stdout: ' + data);
+    });
+
+    deployment.stderr.on('data', function(data) {
+        console.log('stderr: ' + data);
+    });
+
+    return deployment;
 };
 
 exports.startServer = function (config, callback) {
@@ -34,9 +49,11 @@ exports.startServer = function (config, callback) {
     };
 
     var initialize = function(project) {
+        console.log('Initializing project ' + project.name);
         var location = path.join(project.location, project.nextDeploymentID.toString());
             commands = [
                 'mkdir -p ' + location,
+                'cp watchmen_deployment_script ' + path.join(location, '.watchmen_deploying'),
                 'cd ' + location,
                 'git init',
                 'git remote add origin ' + project.remoteLocation,
@@ -44,30 +61,52 @@ exports.startServer = function (config, callback) {
                 'npm install',
                 'bower install',
                 'grunt localDeploy'
+               // 'chmod +x .watchmen_deploying',
+               // './.watchmen_deploying'
             ];
 
-            project.deploymentCommand = commands.join(' && ');
+        project.deploymentCommand = commands.join(' && ');
+        project.initialized = true;
     };
     
     var deploy = function(project) {
         if (project.deployment) {
             project.redeploy = true;
-            project.deployment.kill();
+console.log('killing old deployment of ' + project.name);    
+            
+            psTree(project.deployment.pid, function(err, children) {
+                childProcess.spawn('kill', ['-9'].concat(children.map(function (p) {return p.PID})));
+            });
         }
         else {
-            var deploymentID = project.nextDeploymentID++;
+//            var deploymentID = project.nextDeploymentID++;
+            var location = path.join(project.location, project.nextDeploymentID.toString());
 
             project.redeploy = false;
+
+console.log('deploying ' + project.name + ' now');
             project.deployment = exec(project.deploymentCommand);
             project.deployment.on('exit', function() {
+console.log(project.name + ' deployment ended');
                 delete project.deployment;
                 if (project.redeploy) deploy(project);
             });
+
+
+            var commands = [
+                'cd ' + location,
+                'git pull origin master',
+                'npm update',
+                'bower update',
+                'grunt localDeploy'
+//                './.watchmen_deploying'
+            ];
+            
+            project.deploymentCommand = commands.join(' && ');
         }
     };
 
     github.on('push', function(repo, ref, data) {
-console.dir(data);
         var project = retrieve(repo, data);
         deploy(project);
     });
