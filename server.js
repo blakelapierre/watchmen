@@ -52,6 +52,7 @@ exports.startServer = function (config, callback) {
         console.log('Initializing project ' + project.name);
         var location = path.join(project.location, project.nextDeploymentID.toString());
             commands = [
+                'rm -rf ' + location,
                 'mkdir -p ' + location,
                 'cp watchmen_deployment_script ' + path.join(location, '.watchmen_deploying'),
                 'cd ' + location,
