@@ -33,9 +33,11 @@ exports.startServer = function (config, callback) {
     var github = githubhook(config.server);
 
     var retrieve = function(repo, data) {
+        console.dir(data);
         var project = watching[repo] || {
             name: repo,
             location: '/apps/' + repo,
+            branch: data.repository.master_branch,
             remoteLocation: data.repository.url,
             initialized: false,
             nextDeploymentID: 0
@@ -58,10 +60,8 @@ exports.startServer = function (config, callback) {
                 'cd ' + location,
                 'git init',
                 'git remote add origin ' + project.remoteLocation,
-                'git pull origin master',
-                'npm install',
-                'bower install',
-                'grunt localDeploy'
+                'git pull origin ' + project.branch,
+                './deploy'
                // 'chmod +x .watchmen_deploying',
                // './.watchmen_deploying'
             ];
