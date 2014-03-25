@@ -5,8 +5,7 @@
   "dependencies": {
     "githubhook": "latest",
     "underscore": "latest",
-    "ps-tree": "latest",
-    "webrtc.io": "latest"
+    "ps-tree": "latest"
   },
   "devDependencies": {
     "grunt": "latest",
