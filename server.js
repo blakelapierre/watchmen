@@ -96,10 +96,8 @@ console.log(project.name + ' deployment ended');
 
             var commands = [
                 'cd ' + location,
-                'git pull origin master',
-                // 'npm update',
-                // 'bower update',
-                'grunt localDeploy'
+                'git pull origin ' + project.branch,
+                './deploy'
 //                './.watchmen_deploying'
             ];
             
