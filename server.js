@@ -3,6 +3,7 @@ var githubhook = require('githubhook'),
     sys = require('sys'),
     fs = require('fs'),
     path = require('path'),
+    process = require('process'),
     childProcess = require('child_process'),
     psTree = require('ps-tree');
 
@@ -14,17 +15,10 @@ function exec(command) {
     console.log('executing command: ' + command);
     var deployment = childProcess.spawn('/bin/sh', ['-c', command]);
 
-    deployment.on('error', function(error) {
-        console.dir(error);
-    });
+    deployment.on('error', console.dir);
 
-    deployment.stdout.on('data', function(data) {
-        console.log('stdout: ' + data);
-    });
-
-    deployment.stderr.on('data', function(data) {
-        console.log('stderr: ' + data);
-    });
+    deployment.stdout.on('data', process.stdout.write);
+    deployment.stderr.on('data', process.stderr.write);
 
     return deployment;
 };
