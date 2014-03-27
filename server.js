@@ -3,7 +3,6 @@ var githubhook = require('githubhook'),
     sys = require('sys'),
     fs = require('fs'),
     path = require('path'),
-    process = require('process'),
     childProcess = require('child_process'),
     psTree = require('ps-tree');
 
