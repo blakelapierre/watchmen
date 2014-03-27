@@ -14,7 +14,9 @@ function exec(command) {
     console.log('executing command: ' + command);
     var deployment = childProcess.spawn('/bin/sh', ['-c', command]);
 
-    deployment.on('error', console.dir);
+    deployment.on('error', function(error) {
+        console.dir(error);
+    });
 
     deployment.stdout.on('data', process.stdout.write);
     deployment.stderr.on('data', process.stderr.write);
