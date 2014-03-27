@@ -14,12 +14,10 @@ function exec(command) {
     console.log('executing command: ' + command);
     var deployment = childProcess.spawn('/bin/sh', ['-c', command]);
 
-    deployment.on('error', function(error) {
-        console.dir(error);
-    });
+    deployment.on('error', function(error) { console.dir(error); });
 
-    deployment.stdout.on('data', process.stdout.write);
-    deployment.stderr.on('data', process.stderr.write);
+    deployment.stdout.on('data', function(data) { process.stdout.write(data); });
+    deployment.stderr.on('data', function(data) { process.stderr.write(data); });
 
     return deployment;
 };
@@ -28,7 +26,6 @@ exports.startServer = function (config, callback) {
     var github = githubhook(config.server);
 
     var retrieve = function(repo, data) {
-        console.dir(data);
         var project = watching[repo] || {
             name: repo,
             location: '/apps/' + repo,
