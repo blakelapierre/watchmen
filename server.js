@@ -45,10 +45,6 @@ var readDB = function() {
 exports.startServer = function (config, callback) {
     var github = githubhook(config.server);
 
-    watching = readDB();
-
-    console.log(watching);
-
     var retrieve = function(repo, data) {
         return watching[repo] || initialize({
             name: repo,
@@ -72,8 +68,8 @@ exports.startServer = function (config, callback) {
                 'git remote add origin ' + project.remoteLocation,
                 'git pull origin ' + project.branch,
                 './deploy'
-               // 'chmod +x .watchmen_deploying',
-               // './.watchmen_deploying'
+                // 'chmod +x .watchmen_deploying',
+                // './.watchmen_deploying'
             ];
 
         project.deploymentCommand = commands.join(' && ');
@@ -82,29 +78,30 @@ exports.startServer = function (config, callback) {
         watching[project.name] = project;
 
         writeDB(watching);
-        
+
         return project;
     };
     
     var deploy = function(project) {
         if (project.deployment) {
             project.redeploy = true;
-console.log('killing old deployment of ' + project.name);    
+            console.log('killing old deployment of ' + project.name);    
             
             psTree(project.deployment.pid, function(err, children) {
                 childProcess.spawn('kill', ['-9'].concat(children.map(function (p) {return p.PID})));
             });
         }
         else {
-//            var deploymentID = project.nextDeploymentID++;
+            // var deploymentID = project.nextDeploymentID++;
             var location = path.join(project.location, project.nextDeploymentID.toString());
 
             project.redeploy = false;
 
-console.log('deploying ' + project.name + ' now');
+            console.log('deploying ' + project.name + ' now');
+
             project.deployment = exec(project.deploymentCommand);
             project.deployment.on('exit', function() {
-console.log(project.name + ' deployment ended');
+                console.log(project.name + ' deployment ended');
                 delete project.deployment;
                 if (project.redeploy) deploy(project);
             });
@@ -114,7 +111,7 @@ console.log(project.name + ' deployment ended');
                 'cd ' + location,
                 'git pull origin ' + project.branch,
                 './deploy'
-//                './.watchmen_deploying'
+                // './.watchmen_deploying'
             ];
             
             project.deploymentCommand = commands.join(' && ');
@@ -125,6 +122,13 @@ console.log(project.name + ' deployment ended');
         var project = retrieve(repo, data);
         deploy(project);
     });
+
+    watching = readDB();
+
+    _.each(watching, deploy);
+
+    console.log(watching);
+
 
     github.listen();
 
