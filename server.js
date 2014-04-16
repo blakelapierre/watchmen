@@ -1,5 +1,5 @@
 var githubhook = require('githubhook'),
-    _ = require('underscore'),
+    _ = require('lodash'),
     sys = require('sys'),
     fs = require('fs'),
     path = require('path'),
@@ -22,24 +22,36 @@ function exec(command) {
     return deployment;
 };
 
+var dbFileName = 'watching.json';
+var writeDB = function(db) {
+    fs.writeFile(dbFileName, JSON.stringify(db, null, 1), function(err) {
+        if (err) console.log(err);
+        else console.log('Saved ' + dbFileName);
+    })
+};
+
+var readDB = function() {
+    if (fs.existsSync(dbFileName)) {
+        return JSON.parse(fs.readFileSync(dbFileName));
+    }
+};
+
 exports.startServer = function (config, callback) {
     var github = githubhook(config.server);
 
+    watching = readDB();
+
+    console.log(watching);
+
     var retrieve = function(repo, data) {
-        var project = watching[repo] || {
+        return watching[repo] || initialize({
             name: repo,
             location: '/apps/' + repo,
             branch: data.repository.master_branch,
             remoteLocation: data.repository.url,
             initialized: false,
             nextDeploymentID: 0
-        };
-
-        watching[repo] = project;
-
-        if (!project.initialized) initialize(project);
-        
-        return project;
+        });
     };
 
     var initialize = function(project) {
@@ -60,6 +72,10 @@ exports.startServer = function (config, callback) {
 
         project.deploymentCommand = commands.join(' && ');
         project.initialized = true;
+
+        watching[repo] = project;
+
+        writeDB(watching);
     };
     
     var deploy = function(project) {

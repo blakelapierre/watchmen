@@ -4,7 +4,7 @@
   "description": "watch for github events and react",
   "dependencies": {
     "githubhook": "latest",
-    "underscore": "latest",
+    "lodash": "latest",
     "ps-tree": "latest"
   },
   "devDependencies": {
