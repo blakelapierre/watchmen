@@ -74,7 +74,7 @@ exports.startServer = function (config, callback) {
         project.deploymentCommand = commands.join(' && ');
         project.initialized = true;
 
-        watching[repo] = project;
+        watching[project.repo] = project;
 
         writeDB(watching);
     };
