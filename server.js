@@ -82,6 +82,8 @@ exports.startServer = function (config, callback) {
         watching[project.name] = project;
 
         writeDB(watching);
+        
+        return project;
     };
     
     var deploy = function(project) {
