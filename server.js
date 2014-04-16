@@ -32,7 +32,12 @@ var writeDB = function(db) {
 
 var readDB = function() {
     if (fs.existsSync(dbFileName)) {
-        return JSON.parse(fs.readFileSync(dbFileName));
+        try {
+            return JSON.parse(fs.readFileSync(dbFileName));
+        }
+        catch (e) {
+            console.log(e);
+        }
     }
     return {};
 };
