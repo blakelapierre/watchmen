@@ -34,6 +34,7 @@ var readDB = function() {
     if (fs.existsSync(dbFileName)) {
         return JSON.parse(fs.readFileSync(dbFileName));
     }
+    return {};
 };
 
 exports.startServer = function (config, callback) {
