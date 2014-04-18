@@ -6,7 +6,8 @@ var githubhook = require('githubhook'),
     childProcess = require('child_process'),
     psTree = require('ps-tree');
 
-var watching = {};
+var watching = {},
+    deployments = {};
 
 function puts(error, stdout, stderr) { sys.puts(stdout); };
 
@@ -83,11 +84,13 @@ exports.startServer = function (config, callback) {
     };
     
     var deploy = function(project) {
-        if (project.deployment) {
+        var deployment = deployments[project.name];
+
+        if (deployment) {
             project.redeploy = true;
             console.log('killing old deployment of ' + project.name);    
             
-            psTree(project.deployment.pid, function(err, children) {
+            psTree(deployment.pid, function(err, children) {
                 childProcess.spawn('kill', ['-9'].concat(children.map(function (p) {return p.PID})));
             });
         }
@@ -99,10 +102,10 @@ exports.startServer = function (config, callback) {
 
             console.log('deploying ' + project.name + ' now');
 
-            project.deployment = exec(project.deploymentCommand);
-            project.deployment.on('exit', function() {
+            deployment = exec(project.deploymentCommand);
+            deployment.on('exit', function() {
                 console.log(project.name + ' deployment ended');
-                delete project.deployment;
+                delete deployments[project.name];
                 if (project.redeploy) deploy(project);
             });
 
