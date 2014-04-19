@@ -118,6 +118,8 @@ exports.startServer = function (config, callback) {
             ];
             
             project.deploymentCommand = commands.join(' && ');
+
+            deployments[project.name] = deployment;
         }
     };
 
